@@ -43,6 +43,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private EditText edittext_ech_dns;
     private EditText edittext_ech_domain;
     private EditText edittext_pref_ip;
+    private EditText edittext_proxy_ip;
     private EditText edittext_token;
     private CheckBox checkbox_global;
     // IPv4/IPv6 默认启用，不在 UI 展示
@@ -67,6 +68,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         edittext_ech_dns = (EditText) findViewById(R.id.ech_dns);
         edittext_ech_domain = (EditText) findViewById(R.id.ech_domain);
         edittext_pref_ip = (EditText) findViewById(R.id.pref_ip);
+        edittext_proxy_ip = (EditText) findViewById(R.id.proxy_ip);
         edittext_token = (EditText) findViewById(R.id.token);
         checkbox_global = (CheckBox) findViewById(R.id.global);
         button_apps = (Button) findViewById(R.id.apps);
@@ -318,6 +320,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         edittext_ech_dns.setText(prefs.getEchDns());
         edittext_ech_domain.setText(prefs.getEchDomain());
         edittext_pref_ip.setText(prefs.getPrefIp());
+        edittext_proxy_ip.setText(prefs.getProxyIp());
         edittext_token.setText(prefs.getToken());
         checkbox_global.setChecked(prefs.getGlobal());
 
@@ -327,6 +330,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         edittext_ech_dns.setEnabled(editable);
         edittext_ech_domain.setEnabled(editable);
         edittext_pref_ip.setEnabled(editable);
+        edittext_proxy_ip.setEnabled(editable);
         edittext_token.setEnabled(editable);
         checkbox_global.setEnabled(editable);
         
@@ -376,6 +380,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         prefs.setEchDns(edittext_ech_dns.getText().toString());
         prefs.setEchDomain(edittext_ech_domain.getText().toString());
         prefs.setPrefIp(edittext_pref_ip.getText().toString());
+        prefs.setProxyIp(edittext_proxy_ip.getText().toString().trim());
         prefs.setToken(edittext_token.getText().toString());
         
         // IPv4/IPv6 默认启用

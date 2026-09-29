@@ -149,6 +149,15 @@
             android:layout_height="wrap_content"
             android:singleLine="true"/>
 
+        <TextView android:text="@string/proxy_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <EditText android:id="@+id/proxy_ip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/proxy_ip_hint"
+            android:singleLine="true"/>
+
         <TextView android:text="@string/token"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

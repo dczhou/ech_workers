@@ -194,7 +194,8 @@ public class TProxyService extends VpnService {
                                 prefs.getEchDns(),
                                 prefs.getEchDomain(),
                                 prefs.getPrefIp(),
-                                prefs.getToken()
+                                prefs.getToken(),
+                                prefs.getProxyIp()
                         );
                 } catch (Exception e) {
                         try { TProxyStopService(); } catch (Throwable t) {}

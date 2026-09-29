@@ -9,4 +9,6 @@
 	<string name="save">Сохранить</string>
 	<string name="control_enable">Включить</string>
 	<string name="control_disable">Отключить</string>
+	<string name="proxy_ip">ProxyIP (резервный IP, необязательно):</string>
+	<string name="proxy_ip_hint">Напр.: 1.2.3.4, [2001:db8::1] или proxyip.example.com</string>
 </resources>

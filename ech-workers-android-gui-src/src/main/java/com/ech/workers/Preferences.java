@@ -37,6 +37,7 @@ public class Preferences
         public static final String ECH_DNS = "EchDns";
         public static final String ECH_DOMAIN = "EchDomain";
         public static final String PREF_IP = "PrefIp";
+        public static final String PROXY_IP = "ProxyIp";
         public static final String TOKEN = "Token";
         
         // Profile Management
@@ -122,7 +123,7 @@ public class Preferences
             editor.remove(PROFILE_NAME_PREFIX + id);
             
             // Clean up all keys for this profile
-            String[] keys = {WSS_ADDR, ECH_DNS, ECH_DOMAIN, PREF_IP, TOKEN};
+            String[] keys = {WSS_ADDR, ECH_DNS, ECH_DOMAIN, PREF_IP, PROXY_IP, TOKEN};
             for (String k : keys) {
                 editor.remove(k + "_" + id);
             }
@@ -279,6 +280,15 @@ public class Preferences
         public void setPrefIp(String ip) {
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString(getKey(PREF_IP), ip);
+                editor.commit();
+        }
+
+        // ECH-tunnel: 反代 IP（ProxyIP），留空表示使用 Worker 端内置的 ProxyIP
+        public String getProxyIp() { return prefs.getString(getKey(PROXY_IP), ""); }
+
+        public void setProxyIp(String ip) {
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(getKey(PROXY_IP), ip);
                 editor.commit();
         }
 

@@ -13,6 +13,8 @@
         <string name="ech_dns">ECH DOH 服务器：</string>
         <string name="ech_domain">ECH 公钥查询域名：</string>
         <string name="pref_ip">优选 IP：</string>
+        <string name="proxy_ip">反代 IP（ProxyIP，可选）：</string>
+        <string name="proxy_ip_hint">例：1.2.3.4 或 [2001:db8::1] 或 proxyip.example.com</string>
         <string name="token">身份令牌：</string>
 
         <!-- Profile Management -->

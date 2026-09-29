@@ -31,6 +31,7 @@ var (
 	token      string
 	dnsServer  string
 	echDomain  string
+	proxyIP    string
 
 	echListMu     sync.RWMutex
 	echList       []byte
@@ -38,7 +39,9 @@ var (
 )
 
 // StartSocksProxy 启动 SOCKS5/HTTP 代理，供 Android 调用
-func StartSocksProxy(host, wsServer, dns, ech, ip, tkn string) error {
+// pyip 为反代 IP（ProxyIP，可选）：填写后由 Worker 通过该 IP 回退连接目标，
+// 支持 IPv4/IPv6/域名（IPv6 需使用 [] 包裹），多个可用英文逗号分隔。
+func StartSocksProxy(host, wsServer, dns, ech, ip, tkn, pyip string) error {
 	if wsServer == "" {
 		return fmt.Errorf("缺少 wss 服务地址")
 	}
@@ -47,6 +50,7 @@ func StartSocksProxy(host, wsServer, dns, ech, ip, tkn string) error {
 	serverAddr = wsServer
 	serverIP = ip
 	token = tkn
+	proxyIP = strings.TrimSpace(pyip)
 
 	dnsServer = dns
 	if dnsServer == "" {
@@ -453,6 +457,9 @@ func runProxyServer(addr string) {
 	log.Printf("[代理] 后端服务器: %s", serverAddr)
 	if serverIP != "" {
 		log.Printf("[代理] 使用固定 IP: %s", serverIP)
+	}
+	if proxyIP != "" {
+		log.Printf("[代理] 反代 IP(ProxyIP): %s", proxyIP)
 	}
 
 	for {
@@ -929,7 +936,11 @@ func handleTunnel(conn net.Conn, target, clientAddr string, mode int, firstFrame
 	}
 
 	// 发送连接请求
+	// 协议格式：CONNECT:目标地址|首帧数据[|反代IP]
 	connectMsg := fmt.Sprintf("CONNECT:%s|%s", target, firstFrame)
+	if proxyIP != "" {
+		connectMsg = fmt.Sprintf("CONNECT:%s|%s|%s", target, firstFrame, proxyIP)
+	}
 	mu.Lock()
 	err = wsConn.WriteMessage(websocket.TextMessage, []byte(connectMsg))
 	mu.Unlock()
