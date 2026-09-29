@@ -37,6 +37,13 @@ if [ -z "${ANDROID_NDK_HOME:-}" ] && [ -d "${ANDROID_HOME:-/nonexistent}/ndk" ];
 	echo "==> 使用 NDK: ${ANDROID_NDK_HOME}"
 fi
 
+# gomobile bind 要求当前 Go 模块依赖 golang.org/x/mobile，缺失时自动补充
+# （只影响本次构建检出，仓库中的 go.mod 保持干净）
+if ! grep -q 'golang.org/x/mobile' go.mod; then
+	echo "==> 补充 golang.org/x/mobile 依赖（gomobile bind 需要）"
+	go get -tool golang.org/x/mobile/cmd/gobind
+fi
+
 echo "==> gomobile bind (androidapi=${ANDROID_API})"
 gomobile bind \
 	-target=android \

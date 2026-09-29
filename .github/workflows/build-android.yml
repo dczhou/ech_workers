@@ -1,0 +1,129 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '发布 tag（例如 v1.1）；留空则只产出 Artifact，不创建 Release'
+        required: false
+        default: 'v1.1'
+      ref:
+        description: '要构建的分支/提交（默认当前分支）'
+        required: false
+        default: ''
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install platform / build-tools / NDK
+        run: |
+          sdkmanager --install "platforms;android-34" "build-tools;34.0.0" "ndk;26.3.11579264"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.3.11579264" >> "$GITHUB_ENV"
+
+      - name: Install gomobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          go install golang.org/x/mobile/cmd/gobind@latest
+          gomobile init
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Build ech-workers.aar (gomobile)
+        run: bash ech-workers-android-gui-src/build-aar.sh
+
+      - name: Configure signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cd ech-workers-android-gui-src
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+            printf 'storeFile=release.keystore\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+              "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > store.properties
+            echo "GRADLE_TASK=assembleRelease" >> "$GITHUB_ENV"
+            echo "Configured release signing (alias: $KEY_ALIAS)"
+          else
+            echo "::warning::未配置签名密钥（secrets.KEYSTORE_BASE64），改为构建 debug 签名 APK"
+            echo "GRADLE_TASK=assembleDebug" >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build APK
+        working-directory: ech-workers-android-gui-src
+        run: |
+          chmod +x gradlew
+          ./gradlew "$GRADLE_TASK" --no-daemon --stacktrace
+
+      - name: Collect APKs
+        run: |
+          mkdir -p dist
+          find ech-workers-android-gui-src/build/outputs/apk -name '*.apk' | while read -r f; do
+            b="$(basename "$f")"
+            abi="$(echo "$b" | sed -E 's/^.*-(universal|arm64-v8a|armeabi-v7a|x86_64|x86)-[a-z]+\.apk$/\1/')"
+            cp "$f" "dist/ech-workers-android-${abi}.apk"
+          done
+          (cd dist && sha256sum ./*.apk > SHA256SUMS.txt)
+          ls -lh dist
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ech-workers-android-apk
+          path: |
+            dist/*.apk
+            dist/SHA256SUMS.txt
+          retention-days: 30
+
+      - name: Resolve release tag
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "RELEASE_TAG=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          elif [ -n "${{ inputs.tag }}" ]; then
+            echo "RELEASE_TAG=${{ inputs.tag }}" >> "$GITHUB_ENV"
+          fi
+
+      # 若 fork 的 GITHUB_TOKEN 无 contents:write 权限，此步骤会失败但不影响构建与 Artifact
+      - name: Create GitHub Release
+        if: ${{ env.RELEASE_TAG != '' }}
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ env.RELEASE_TAG }}
+          files: |
+            dist/*.apk
+            dist/SHA256SUMS.txt
+          generate_release_notes: true
+          draft: false
+          prerelease: false

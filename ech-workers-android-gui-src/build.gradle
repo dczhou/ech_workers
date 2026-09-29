@@ -1,3 +1,13 @@
+buildscript {
+	repositories {
+		google()
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'com.android.tools.build:gradle:8.5.2'
+	}
+}
+
 apply plugin: 'com.android.application'
 
 android {
@@ -9,8 +19,8 @@ android {
                 applicationId "com.ech.workers"
                 minSdkVersion 24
                 targetSdkVersion 34
-                versionCode 1
-                versionName "1.0"
+                versionCode 2
+                versionName "1.1"
                 // archivesName 不在 defaultConfig 作用域，移至 base 扩展
                 ndk {
                         abiFilters "armeabi-v7a", "arm64-v8a",'x86','x86_64'
@@ -39,11 +49,13 @@ signingConfigs {
         buildTypes {
                 release {
                         minifyEnabled false
-                        signingConfig signingConfigs.release
+                        // 存在 store.properties 时使用发布签名，否则产出未签名 APK（可再由 apksigner 签名）
+                        if (rootProject.file('store.properties').exists()) {
+                                signingConfig signingConfigs.release
+                        }
                 }
                 debug {
                         minifyEnabled false
-                        signingConfig signingConfigs.release
                 }
         }
 
@@ -76,7 +88,7 @@ signingConfigs {
 		}
 	}
 
-	lintOptions {
+	lint {
 		checkReleaseBuilds false
 		// Or, if you prefer, you can continue to check for errors in release builds,
 		// but continue the build even when errors are found:
@@ -102,6 +114,8 @@ plugins.withId('base') {
 }
 
 repositories {
+        google()
+        mavenCentral()
         flatDir { dirs rootProject.projectDir }
 }
 

@@ -23,7 +23,40 @@ gomobile bind -target=android -androidapi 24 -javapkg=com.ech.workers \
 
 > 注意：`workers.go` 中导出函数（如 `StartSocksProxy`）的签名变更后，
 > 必须重新生成 aar，否则 Java 侧会与旧 aar 不匹配。
-> 更多平台编译方式可参考 https://github.com/zhao-zg/ech-workers/blob/main/.github/workflows/build-android.yml
+> 脚本会在需要时自动向 Go 模块补 `golang.org/x/mobile` 依赖（仅影响本次检出）。
+
+## 打包 APK
+
+**在线打包（推荐）**：仓库自带 [`.github/workflows/build-android.yml`](../.github/workflows/build-android.yml)，
+在 Actions 里手动 `Run workflow` 并填写发布 tag（如 `v1.1`），或推送 `v*` 标签即可自动：
+
+1. gomobile 生成 `ech-workers.aar`
+2. Gradle 打包 4 个 ABI + universal 共 5 个 APK
+3. 上传 Artifact，并创建/更新对应的 GitHub Release
+
+签名密钥保存在仓库 Secrets：`KEYSTORE_BASE64`、`KEYSTORE_PASSWORD`、`KEY_ALIAS`、`KEY_PASSWORD`；
+未配置时自动降级为 debug 签名 APK。
+
+**本地打包**：
+
+```bash
+# 1) 生成 aar（需要 gomobile + Android NDK）
+bash ech-workers-android-gui-src/build-aar.sh
+
+# 2) 打包（需要 Android SDK 34 + JDK 17）
+cd ech-workers-android-gui-src
+echo "sdk.dir=$ANDROID_HOME" > local.properties
+./gradlew assembleRelease      # 无 store.properties 时产出未签名 APK
+```
+
+使用发布签名时，把密钥库放到本目录并在 `store.properties` 中填写：
+
+```properties
+storeFile=release.keystore
+storePassword=***
+keyAlias=***
+keyPassword=***
+```
 
 ## 功能设置
 

@@ -1,0 +1,9 @@
+# Android 构建产物
+ech-workers-android-gui-src/build/
+ech-workers-android-gui-src/.gradle/
+ech-workers-android-gui-src/ech-workers.aar
+ech-workers-android-gui-src/ech-workers-sources.jar
+ech-workers-android-gui-src/store.properties
+ech-workers-android-gui-src/release.keystore
+ech-workers-android-gui-src/local.properties
+dist/
