@@ -33,4 +33,22 @@
         <string name="toast_cannot_delete_last">不能删除最后一个节点</string>
         <string name="ok">确定</string>
         <string name="cancel">取消</string>
+
+        <!-- Node speed test -->
+        <string name="btn_test">测试</string>
+        <string name="test_title">节点测速</string>
+        <string name="test_progress">正在测试 %1$d/%2$d：%3$s</string>
+        <string name="test_result_title">测速结果</string>
+        <string name="test_summary">共 %1$d 个节点，用时 %2$d 秒</string>
+        <string name="test_line">合计 %1$d ms（建连 %2$d / 访问 %3$d）</string>
+        <string name="test_status_suffix">　HTTP %1$d</string>
+        <string name="test_no_server">未配置服务器地址</string>
+        <string name="test_failed">失败</string>
+        <string name="test_self_in_vpn">请先在分应用代理中排除本应用再测速</string>
+        <string name="test_no_tun_note">说明：测速不经过系统 VPN（不含 tun 本地开销），真实使用会略慢；节点间排序不受影响。</string>
+        <string name="test_vpn_note">说明：若当前有其它 VPN 应用在运行，测速结果不可比。</string>
+        <string name="test_untested">未测试</string>
+        <string name="test_cancelled">已取消（显示已完成的结果）</string>
+        <string name="test_myip">myip.ms（非 CF CDN）</string>
+        <string name="test_whatismyip">whatismyipaddress.com（CF CDN）</string>
 </resources>

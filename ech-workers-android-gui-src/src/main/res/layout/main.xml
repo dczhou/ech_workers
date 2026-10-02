@@ -95,6 +95,16 @@
                 android:textColor="#FFFFFF"
                 android:backgroundTint="#F44336"
                 android:textSize="12sp"/>
+
+            <Button
+                android:id="@+id/btn_test"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/btn_test"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#009688"
+                android:textSize="12sp"/>
         </LinearLayout>
 
         <TextView android:text="@string/wss_addr"

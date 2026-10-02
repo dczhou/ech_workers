@@ -69,6 +69,11 @@ public class Preferences
             return key + "_" + currentProfileId;
         }
 
+        // Helper to get key with explicit profile suffix（用于读取非当前节点，如节点测速）
+        private String getKeyFor(String key, String profileId) {
+            return key + "_" + profileId;
+        }
+
         public Set<String> getProfileIds() {
             return prefs.getStringSet(PROFILES, new HashSet<String>(java.util.Collections.singletonList("default")));
         }
@@ -243,7 +248,11 @@ public class Preferences
 
         // ECH-tunnel: 远端 WSS 地址
         public String getWssAddr() {
-                return prefs.getString(getKey(WSS_ADDR), "");
+                return getWssAddr(currentProfileId);
+        }
+
+        public String getWssAddr(String profileId) {
+                return prefs.getString(getKeyFor(WSS_ADDR, profileId), "");
         }
 
         public void setWssAddr(String addr) {
@@ -254,7 +263,11 @@ public class Preferences
 
         // ECH-tunnel: DNS 服务器
         public String getEchDns() {
-                return prefs.getString(getKey(ECH_DNS), "dns.alidns.com/dns-query");
+                return getEchDns(currentProfileId);
+        }
+
+        public String getEchDns(String profileId) {
+                return prefs.getString(getKeyFor(ECH_DNS, profileId), "dns.alidns.com/dns-query");
         }
 
         public void setEchDns(String addr) {
@@ -265,7 +278,11 @@ public class Preferences
 
         // ECH-tunnel: 域名
         public String getEchDomain() {
-                return prefs.getString(getKey(ECH_DOMAIN), "cloudflare-ech.com");
+                return getEchDomain(currentProfileId);
+        }
+
+        public String getEchDomain(String profileId) {
+                return prefs.getString(getKeyFor(ECH_DOMAIN, profileId), "cloudflare-ech.com");
         }
 
         public void setEchDomain(String d) {
@@ -275,7 +292,11 @@ public class Preferences
         }
 
         // ECH-tunnel: 优选 IP
-        public String getPrefIp() { return prefs.getString(getKey(PREF_IP), ""); }
+        public String getPrefIp() { return getPrefIp(currentProfileId); }
+
+        public String getPrefIp(String profileId) {
+                return prefs.getString(getKeyFor(PREF_IP, profileId), "");
+        }
 
         public void setPrefIp(String ip) {
                 SharedPreferences.Editor editor = prefs.edit();
@@ -284,7 +305,11 @@ public class Preferences
         }
 
         // ECH-tunnel: 反代 IP（ProxyIP），留空表示使用 Worker 端内置的 ProxyIP
-        public String getProxyIp() { return prefs.getString(getKey(PROXY_IP), ""); }
+        public String getProxyIp() { return getProxyIp(currentProfileId); }
+
+        public String getProxyIp(String profileId) {
+                return prefs.getString(getKeyFor(PROXY_IP, profileId), "");
+        }
 
         public void setProxyIp(String ip) {
                 SharedPreferences.Editor editor = prefs.edit();
@@ -293,12 +318,81 @@ public class Preferences
         }
 
         // ECH-tunnel: 子协议令牌
-        public String getToken() { return prefs.getString(getKey(TOKEN), ""); }
+        public String getToken() { return getToken(currentProfileId); }
+
+        public String getToken(String profileId) {
+                return prefs.getString(getKeyFor(TOKEN, profileId), "");
+        }
 
         public void setToken(String t) {
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString(getKey(TOKEN), t);
                 editor.commit();
+        }
+
+        // ==================== 节点测速支持 ====================
+
+        /** 一个已保存节点的完整配置快照（供节点测速使用，与当前选中节点无关） */
+        public static class NodeConfig {
+                public final String id;
+                public final String name;
+                public final String wssAddr;
+                public final String echDns;
+                public final String echDomain;
+                public final String prefIp;
+                public final String proxyIp;
+                public final String token;
+
+                NodeConfig(String id, String name, String wssAddr, String echDns, String echDomain,
+                           String prefIp, String proxyIp, String token) {
+                        this.id = id;
+                        this.name = name;
+                        this.wssAddr = wssAddr;
+                        this.echDns = echDns;
+                        this.echDomain = echDomain;
+                        this.prefIp = prefIp;
+                        this.proxyIp = proxyIp;
+                        this.token = token;
+                }
+
+                /** Go 侧期望的服务器地址形式：host:port[/path] */
+                public String normalizedWsAddr() {
+                        return normalizeWsAddr(wssAddr);
+                }
+        }
+
+        /** 读取指定节点的配置快照 */
+        public NodeConfig getNodeConfig(String profileId) {
+                return new NodeConfig(
+                        profileId,
+                        getProfileName(profileId),
+                        getWssAddr(profileId),
+                        getEchDns(profileId),
+                        getEchDomain(profileId),
+                        getPrefIp(profileId),
+                        getProxyIp(profileId),
+                        getToken(profileId));
+        }
+
+        /**
+         * 归一化 WSS 地址：去掉 scheme 前缀，无路径时补 "/"，
+         * 得到 Go 侧 parseServerAddr 期望的 host:port[/path]。
+         * 例："wss://a.example.com:443" → "a.example.com:443/"；
+         *     "a.example.com:443/x"  → "a.example.com:443/x"。
+         */
+        public static String normalizeWsAddr(String raw) {
+                if (raw == null) {
+                        return "";
+                }
+                String addr = raw.trim();
+                int idx = addr.indexOf("://");
+                if (idx >= 0) {
+                        addr = addr.substring(idx + 3);
+                }
+                if (!addr.contains("/")) {
+                        addr = addr + "/";
+                }
+                return addr;
         }
 
 }

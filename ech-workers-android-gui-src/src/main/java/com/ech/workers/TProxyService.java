@@ -180,14 +180,7 @@ public class TProxyService extends VpnService {
 
                 // 同时启动本地 SOCKS5（127.0.0.1:port）并桥接到远端 WSS/ECH
                 try {
-                        String wsAddr = prefs.getWssAddr().trim();
-                        int idx = wsAddr.indexOf("://");
-                        if (idx >= 0) {
-                                String rest = wsAddr.substring(idx + 3);
-                                if (!rest.contains("/")) {
-                                        wsAddr = wsAddr + "/";
-                                }
-                        }
+                        String wsAddr = Preferences.normalizeWsAddr(prefs.getWssAddr());
                         Tunnel.startSocksProxy(
                                 prefs.getSocksAddress() + ":" + Integer.toString(prefs.getSocksPort()),
                                 wsAddr,
