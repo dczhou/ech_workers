@@ -25,7 +25,6 @@
 	<string name="test_self_in_vpn">Сначала исключите это приложение из списка проксируемых</string>
 	<string name="test_no_tun_note">Проверка идёт без системного VPN (без накладных расходов tun), в реальном использовании будет немного медленнее; порядок узлов не меняется.</string>
 	<string name="test_vpn_note">Если активно другое VPN-приложение, результаты несопоставимы.</string>
-	<string name="test_untested">Не проверено</string>
 	<string name="test_cancelled">Отменено (показаны завершённые результаты)</string>
 	<string name="test_myip">myip.ms (без CF CDN)</string>
 	<string name="test_whatismyip">whatismyipaddress.com (CF CDN)</string>

@@ -47,7 +47,6 @@
         <string name="test_self_in_vpn">请先在分应用代理中排除本应用再测速</string>
         <string name="test_no_tun_note">说明：测速不经过系统 VPN（不含 tun 本地开销），真实使用会略慢；节点间排序不受影响。</string>
         <string name="test_vpn_note">说明：若当前有其它 VPN 应用在运行，测速结果不可比。</string>
-        <string name="test_untested">未测试</string>
         <string name="test_cancelled">已取消（显示已完成的结果）</string>
         <string name="test_myip">myip.ms（非 CF CDN）</string>
         <string name="test_whatismyip">whatismyipaddress.com（CF CDN）</string>

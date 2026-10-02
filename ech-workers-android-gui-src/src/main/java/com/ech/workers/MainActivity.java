@@ -368,8 +368,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         btn_rename_profile.setBackgroundTintList(android.content.res.ColorStateList.valueOf(editable ? 0xFFFF9800 : grey));
         btn_delete_profile.setBackgroundTintList(android.content.res.ColorStateList.valueOf(editable ? 0xFFF44336 : grey));
 
-        // 测速按钮：服务开启或测速进行中不可点
-        boolean canTest = editable && !testing;
+        // 测速按钮：测速进行中不可点。
+        // 注意：测速不读写配置、不建立 VPN 隧道，因此服务运行期间同样允许测试
+        // （与其它按钮不同，不跟随 editable 置灰），便于连接状态下比较其它节点。
+        boolean canTest = !testing;
         btn_test.setEnabled(canTest);
         btn_test.setBackgroundTintList(android.content.res.ColorStateList.valueOf(canTest ? 0xFF009688 : grey));
 
